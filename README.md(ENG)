@@ -1,0 +1,121 @@
+# SSL-Inspection-Gateway-Lab – pfSense & Squid Proxy
+
+## Overview
+
+This lab demonstrates the implementation of a network security gateway capable of intercepting, decrypting, and analyzing HTTPS traffic in a LAN environment using pfSense and Squid Proxy.
+
+The solution relies on **Man-In-The-Middle (on-path) SSL inspection** to enforce web filtering policies, monitor secure connections, and analyze encrypted network traffic.  
+This lab simulates an enterprise-grade web security infrastructure.
+
+---
+
+## Architecture
+
+Windows Clients
+|
+(LAN Network)
+|
+pfSense Firewall
+|
+Squid Proxy (SSL MITM)
+|
+Internet
+
+
+pfSense acts as an internal Certificate Authority to intercept and re-issue HTTPS connections in a controlled manner.
+
+---
+
+## Environment
+
+- pfSense firewall  
+- Squid Proxy (transparent HTTP/HTTPS)  
+- Internal Certificate Authority (CA)  
+- Windows clients  
+- LAN network  
+
+---
+
+## Squid Proxy Installation
+
+Squid Proxy is installed via the pfSense package manager.
+
+Navigate to: Services > Squid Proxy Server > General
+
+
+### General Settings
+
+- Enable **Enable Squid Proxy**
+- Enable **Transparent HTTP Proxy**
+- Configure the proxy port to **3128**
+
+<img width="675" height="467" src="https://github.com/user-attachments/assets/41839b72-95df-48f9-8d25-e39e2f9dd5ad" />
+
+---
+
+### SSL MITM Filtering
+
+- Enable **HTTPS/SSL interception**
+- SSL/MITM Mode: **Splice Whitelist, Bump Otherwise**
+- Configure SSL Proxy Port to **3129**
+- Save the configuration
+
+<img width="700" height="463" src="https://github.com/user-attachments/assets/c54ccfdb-5d07-41fe-bcb1-3ed3fd825821" />
+
+---
+
+## SSL MITM Configuration
+
+Navigate to: System > Certificates > CAs
+
+
+Create a new internal Certificate Authority and export the certificate after creation:
+
+| Field | Value |
+|------|------|
+| Descriptive Name | Squid_CA |
+| Method | Create an internal Certificate Authority |
+| Common Name | Squid_CA |
+| Lifetime | 3650 days |
+
+Export the certificate after creation.
+
+---
+
+## Client Certificate Deployment (Windows)
+
+On each Windows client:
+
+1. Import the Squid_CA certificate  
+2. Select **Place all certificates in the following store**  
+3. Choose **Trusted Root Certification Authorities**
+
+<img width="525" height="84" src="https://github.com/user-attachments/assets/f6bc5562-3618-4596-b455-37c1370c164a" />
+
+4. Reboot the machine
+
+---
+
+## Validation
+
+Browse to an HTTPS website (e.g., https://www.google.com).  
+Open the certificate details in the browser.
+
+If **Squid_CA** is displayed as the issuing CA, HTTPS traffic is successfully intercepted, decrypted, and logged by the security gateway.
+
+<img width="867" height="565" src="https://github.com/user-attachments/assets/84cf5865-386f-4614-b1f8-2e4707fb4e22" />
+
+---
+
+## Results
+
+This solution enables:
+
+- HTTPS traffic interception  
+- Encrypted traffic inspection  
+- Web filtering policy enforcement  
+- Centralized logging of web connections  
+
+This lab demonstrates the implementation of an enterprise-grade SSL inspection security gateway.
+
+
